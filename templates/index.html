@@ -15,6 +15,79 @@
                 }
                 return result;
             }
+
+            function getIntellisenseQuery() {
+                let query = '';
+                let editorElem = $('#editor');
+                let queryStart = 0;
+                let curStart = editorElem.prop('selectionStart');
+                let curEnd = editorElem.prop('selectionEnd');
+                // If a word is selected
+                if (curStart != curEnd) {
+                    queryStart = curStart;
+                    query = getText(queryStart, curEnd);
+                } else {
+                    // If there is no selection
+                    // Get word back to latest period or beggnining of line
+                    let textValue = editorElem.val();
+                    for (let i = curEnd - 1; i > 0; i--) {
+                        if (textValue[i] === '.' || textValue[i] === '\n' || textValue[i] === '[') {
+                            queryStart = i;
+                            break;
+                        }
+                    }
+
+                    query = getText(queryStart, curEnd);
+                }
+                return {
+                    inteliQuery: query,
+                    qStart: queryStart,
+                    qEnd: curEnd
+                };
+            }
+
+            function processIntellisenseQuery(query, qStart, qEnd) {
+                $.ajax({
+                    url: '/inteliquery',
+                    data: {
+                        query: String(query).substring(1) // Send query text minus separator character
+                    },
+                    success: (result) => {
+                        let textValue = $('#editor').val();
+                        let newTextValue = '';
+                        for (let i = 0; i < textValue.length; i++) {
+                            if (i == qStart) {
+                                newTextValue += query.substring(0, 1) + result;
+                                i = qEnd - 1;
+                            } else {
+                                newTextValue += textValue[i];
+                            }
+                        }
+                        $('#editor').val(newTextValue);
+                    }
+                });
+            }
+
+            $(document).ready(() => {
+                $('#editor').on('keydown', (event) => {
+                    if (event.which == 9) { // If tab key was pressed
+                        event.preventDefault();
+                    }
+                });
+
+                $('#editor').on('keyup', (event) => {
+                    if (event.which == 9) {
+                        let queryResult = getIntellisenseQuery();
+                        processIntellisenseQuery(
+                            queryResult.inteliQuery,
+                            queryResult.qStart,
+                            queryResult.qEnd
+                        );
+
+                        event.stopImmediatePropagation();
+                    }
+                })
+            })
         </script>
         <h1>Fields</h1>
         <ul>
