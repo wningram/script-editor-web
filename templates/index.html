@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>My Webpage</title>
+    </head>
+    <body>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+        <script type="text/javascript">
+            function getText(ndxStart, ndxEnd) {
+                let textValue = $('#editor').val();
+                let result = '';
+                for (let i = ndxStart; i < ndxEnd; i++) {
+                    result += textValue[i];
+                }
+                return result;
+            }
+        </script>
+        <h1>Fields</h1>
+        <ul>
+            {%for item in fields %}
+                <li><a href="">{{ item }}</a></li>
+            {% endfor %}
+        </ul>
+        
+        <h1>My Webpage</h1>
+        <b style="color: red;">{{ validation_message }}</b>
+        <form action="/validate">
+            <textarea rows="30" cols="60" name="editor_text" id="editor"></textarea>
+            <input type="submit" name="submit"/>
+        </form>
+    </body>
+</html>
